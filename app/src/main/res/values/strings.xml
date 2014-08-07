@@ -1,8 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">OBDScanner</string>
+    <string name="app_name">OBD2 Scanner</string>
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
+    <string name="title_activity_display_information">@string/app_name</string>
+    <string name="title_tab_performance">Performance</string>
+    <string name="title_tab_dash">Dash</string>
+    <string name="title_tab_data">Data</string>
+    <string name="title_tab_faults">Faults</string>
+    <string name="title_tab_adapter">Adapter</string>
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 
 </resources>
