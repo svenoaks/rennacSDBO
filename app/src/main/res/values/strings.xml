@@ -11,5 +11,9 @@
     <string name="title_tab_faults">Faults</string>
     <string name="title_tab_adapter">Adapter</string>
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="button_positive">OK</string>
+    <string name="button_negative">Cancel</string>
+    <string name="message_bluetooth_connect">Connect to your Device...</string>
+    <string name="tag_bluetooth_connect">bluetooth connect</string>
 
 </resources>

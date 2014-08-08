@@ -1,4 +1,4 @@
-package com.smp.obdscanner.DisplayInformation;
+package com.smp.obdscanner.information;
 
 /**
  * Created by Steve on 8/6/14.

@@ -9,7 +9,7 @@
         android:theme="@style/AppTheme" >
 
         <activity
-            android:name=".DisplayInformation.DisplayInformationActivity"
+            android:name=".information.DisplayInformationActivity"
             android:label="@string/title_activity_display_information" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

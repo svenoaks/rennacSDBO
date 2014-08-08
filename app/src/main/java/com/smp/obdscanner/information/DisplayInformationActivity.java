@@ -1,7 +1,8 @@
-package com.smp.obdscanner.DisplayInformation;
+package com.smp.obdscanner.information;
 
 import android.app.ActionBar;
 import android.app.Activity;
+import android.app.DialogFragment;
 import android.app.FragmentTransaction;
 import android.net.Uri;
 import android.os.Bundle;
@@ -11,7 +12,11 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import com.smp.obdscanner.R;
-import com.smp.obdscanner.View.SlidingTabLayout;
+import com.smp.obdscanner.connect.BluetoothConnectDialogFragment;
+import com.smp.obdscanner.view.SlidingTabLayout;
+
+import butterknife.ButterKnife;
+import butterknife.InjectView;
 
 public class DisplayInformationActivity extends Activity implements ActionBar.TabListener,
         OBDAdapterFragment.OnAdapterFragmentInteractionListener
@@ -30,15 +35,14 @@ public class DisplayInformationActivity extends Activity implements ActionBar.Ta
     /**
      * The {@link ViewPager} that will host the section contents.
      */
-    ViewPager mViewPager;
-    private SlidingTabLayout mSlidingTabLayout;
+    @InjectView(R.id.pager) ViewPager mViewPager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_display_information);
-
+        ButterKnife.inject(this);
         // Set up the action bar.
         final ActionBar actionBar = getActionBar();
         actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
@@ -48,7 +52,6 @@ public class DisplayInformationActivity extends Activity implements ActionBar.Ta
         mSectionsPagerAdapter = new DisplayInformationPagerAdapter(getFragmentManager(), this);
 
         // Set up the ViewPager with the sections adapter.
-        mViewPager = (ViewPager) findViewById(R.id.pager);
         mViewPager.setAdapter(mSectionsPagerAdapter);
 
         /*
@@ -83,6 +86,13 @@ public class DisplayInformationActivity extends Activity implements ActionBar.Ta
         }
 
         mViewPager.setCurrentItem(InformationType.ADAPTER.getValue());
+        connectBluetooth();
+    }
+
+    private void connectBluetooth()
+    {
+        DialogFragment dialog = new BluetoothConnectDialogFragment();
+        dialog.show(getFragmentManager(), getString(R.string.tag_bluetooth_connect));
     }
 
 
