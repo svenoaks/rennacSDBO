@@ -3,31 +3,63 @@ package com.smp.obdscanner.servicedata;
 import android.app.Service;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Binder;
 import android.os.IBinder;
+import android.provider.Settings;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 
+import com.smp.obdscanner.R;
+
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Method;
+import java.util.UUID;
 
 public class ObdCommandService extends Service
 {
     private static final String TAG = "OBD_SERVICE";
+    private UUID MY_UUID;
+
 
     private BluetoothDevice device;
     private BluetoothSocket socket;
     private BluetoothSocket socketFallback;
 
     @Override
+    public void onCreate()
+    {
+        super.onCreate();
+        String androidId = Settings.Secure.getString(this.getContentResolver(), Settings.Secure.ANDROID_ID);
+        try
+        {
+            MY_UUID = UUID.nameUUIDFromBytes(androidId.getBytes("utf8"));
+        } catch (UnsupportedEncodingException e)
+        {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
     public int onStartCommand(Intent intent, int flags, int startId)
     {
-        return super.onStartCommand(intent, flags, startId);
+        device = intent.getParcelableExtra(getString(R.string.intent_bluetooth_device));
+        try
+        {
+            startObdConnection();
+        } catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+        return START_NOT_STICKY;
     }
 
     @Override
     public IBinder onBind(Intent intent)
     {
-       return new ObdCommandBinder();
+        return new ObdCommandBinder();
     }
 
     public void stopService()
@@ -45,6 +77,37 @@ public class ObdCommandService extends Service
             }
 
         stopSelf();
+    }
+
+    //TODO figure out what the hell it's doing.
+    private void startObdConnection() throws IOException
+    {
+        Log.d(TAG, "Starting OBD connection..");
+
+        try
+        {
+            // Instantiate a BluetoothSocket for the remote device and connect it.
+            socket = device.createRfcommSocketToServiceRecord(MY_UUID);
+            socket.connect();
+        } catch (Exception e1)
+        {
+            Log.e(TAG, "There was an error while establishing Bluetooth connection. Falling back..", e1);
+            Class<?> clazz = socket.getRemoteDevice().getClass();
+            Class<?>[] paramTypes = new Class<?>[]{Integer.TYPE};
+            try
+            {
+                Method m = clazz.getMethod("createRfcommSocket", paramTypes);
+                Object[] params = new Object[]{Integer.valueOf(1)};
+                socketFallback = (BluetoothSocket) m.invoke(socket.getRemoteDevice(), params);
+                socketFallback.connect();
+                socket = socketFallback;
+            } catch (Exception e2)
+            {
+                Log.e(TAG, "Couldn't fallback while establishing Bluetooth connection. Stopping app..", e2);
+                stopService();
+                return;
+            }
+        }
     }
 
     public class ObdCommandBinder extends Binder
