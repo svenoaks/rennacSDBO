@@ -19,7 +19,7 @@
     <string name="label_paired_devices">Paired Devices:</string>
     <string name="toast_enable_bluetooth">You must enable bluetooth to connect to the device.</string>
     <string name="label_no_devices">No devices found.</string>
-    <string name="label_find_devices">Scan for devices.</string>
+    <string name="label_find_devices">Scan for devices</string>
     <string name="label_found_devices">Discovered Devices:</string>
 
 </resources>

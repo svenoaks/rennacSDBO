@@ -14,7 +14,6 @@ import android.content.IntentFilter;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.Toast;
@@ -30,22 +29,6 @@ import java.util.Set;
  */
 public class BluetoothConnectDialogFragment extends DialogFragment
 {
-    public enum FoundFlipperState
-    {
-        BUTTON(0), PROGRESS(1), LIST(2), NOT_FOUND(3);
-
-        private int value;
-
-        private FoundFlipperState(int value)
-        {
-            this.value = value;
-        }
-
-        public int getValue()
-        {
-            return value;
-        }
-    }
     public static final int REQUEST_ENABLE_BT = 4343;
     private final BroadcastReceiver mFoundReceiver = new BroadcastReceiver()
     {
@@ -59,13 +42,13 @@ public class BluetoothConnectDialogFragment extends DialogFragment
                 // Get the BluetoothDevice object from the Intent
                 BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
                 // Add the name and address to an array adapter to show in a ListView
-                mFoundArrayAdapter.add(device.getName() + "\n" + device.getAddress());
+                mFoundArrayAdapter.add(device);
             }
         }
     };
     private BluetoothAdapter mBluetoothAdapter;
-    private ArrayAdapter<String> mPairedArrayAdapter;
-    private ArrayAdapter<String> mFoundArrayAdapter;
+    private BluetoothDeviceAdapter mPairedArrayAdapter;
+    private BluetoothDeviceAdapter mFoundArrayAdapter;
     private ListView mPairedDeviceListView;
     private ListView mFoundDeviceListView;
     private View rootView;
@@ -92,7 +75,7 @@ public class BluetoothConnectDialogFragment extends DialogFragment
         {
             for (BluetoothDevice device : pairedDevices)
             {
-                mPairedArrayAdapter.add(device.getName() + "\n" + device.getAddress());
+                mPairedArrayAdapter.add(device);
             }
         }
     }
@@ -108,6 +91,12 @@ public class BluetoothConnectDialogFragment extends DialogFragment
     {
         super.onCreate(savedInstanceState);
     }
+
+    @Override
+    public void onPause()
+    {
+        super.onPause();
+    }
     /*
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
@@ -115,12 +104,6 @@ public class BluetoothConnectDialogFragment extends DialogFragment
         return super.onCreateView(inflater, container, savedInstanceState);
     }
     */
-
-    @Override
-    public void onPause()
-    {
-        super.onPause();
-    }
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState)
@@ -145,8 +128,8 @@ public class BluetoothConnectDialogFragment extends DialogFragment
     {
         super.onActivityCreated(savedInstanceState);
 
-        mPairedArrayAdapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_list_item_1, new ArrayList<String>());
-        mFoundArrayAdapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_list_item_1, new ArrayList<String>());
+        mPairedArrayAdapter = new BluetoothDeviceAdapter(getActivity(), android.R.layout.simple_list_item_2, android.R.id.text1, new ArrayList<BluetoothDevice>());
+        mFoundArrayAdapter = new BluetoothDeviceAdapter(getActivity(), android.R.layout.simple_list_item_2, android.R.id.text1, new ArrayList<BluetoothDevice>());
 
         mScanFlipper = (ViewFlipper) rootView.findViewById(R.id.flipper_found_device);
         mScanButton = (Button) rootView.findViewById(R.id.button_bluetooth_scan);
@@ -176,7 +159,6 @@ public class BluetoothConnectDialogFragment extends DialogFragment
         mScanFlipper.setDisplayedChild(FoundFlipperState.PROGRESS.getValue());
         mBluetoothAdapter.startDiscovery();
     }
-
 
     private void initBluetooth()
     {
@@ -222,5 +204,22 @@ public class BluetoothConnectDialogFragment extends DialogFragment
         if (mBluetoothAdapter != null) mBluetoothAdapter.cancelDiscovery();
         getActivity().unregisterReceiver(mFoundReceiver);
         super.onDestroy();
+    }
+
+    public enum FoundFlipperState
+    {
+        BUTTON(0), PROGRESS(1), LIST(2), NOT_FOUND(3);
+
+        private int value;
+
+        private FoundFlipperState(int value)
+        {
+            this.value = value;
+        }
+
+        public int getValue()
+        {
+            return value;
+        }
     }
 }
