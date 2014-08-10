@@ -1,4 +1,4 @@
-package com.smp.obdscanner.service;
+package com.smp.obdscanner.servicedata;
 
 import pt.lighthouselabs.obd.commands.ObdCommand;
 

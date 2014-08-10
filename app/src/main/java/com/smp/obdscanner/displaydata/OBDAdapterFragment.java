@@ -1,4 +1,4 @@
-package com.smp.obdscanner.displayinformation;
+package com.smp.obdscanner.displaydata;
 
 import android.app.Activity;
 import android.app.Fragment;

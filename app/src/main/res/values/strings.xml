@@ -21,5 +21,6 @@
     <string name="label_no_devices">No devices found.</string>
     <string name="label_find_devices">Scan for devices</string>
     <string name="label_found_devices">Discovered Devices:</string>
+    <string name="intent_bluetooth_device">SMP_INTENT_BLUETOOTH_DEVICE</string>
 
 </resources>

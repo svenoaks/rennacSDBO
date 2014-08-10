@@ -15,6 +15,7 @@
 
     <ListView
         android:id="@+id/listview_paired_device"
+        android:clickable="true"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
 
@@ -42,6 +43,7 @@
 
         <ListView
             android:id="@+id/listview_found_device"
+            android:clickable="true"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"/>
 

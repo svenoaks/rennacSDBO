@@ -1,40 +1,53 @@
-package com.smp.obdscanner.displayinformation;
+package com.smp.obdscanner.displaydata;
 
 import android.app.ActionBar;
 import android.app.Activity;
 import android.app.DialogFragment;
 import android.app.FragmentTransaction;
+import android.bluetooth.BluetoothDevice;
+import android.content.ComponentName;
+import android.content.Intent;
+import android.content.ServiceConnection;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.v13.app.FragmentPagerAdapter;
+import android.os.IBinder;
 import android.support.v4.view.ViewPager;
 import android.view.Menu;
 import android.view.MenuItem;
 
 import com.smp.obdscanner.R;
 import com.smp.obdscanner.connect.BluetoothConnectDialogFragment;
+import com.smp.obdscanner.connect.OnBluetoothDeviceSelectedListener;
+import com.smp.obdscanner.servicedata.ObdCommandService;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 
 public class DisplayInformationActivity extends Activity implements ActionBar.TabListener,
-        OBDAdapterFragment.OnAdapterFragmentInteractionListener
+        OBDAdapterFragment.OnAdapterFragmentInteractionListener, OnBluetoothDeviceSelectedListener
 {
+    @InjectView(R.id.pager)
+    ViewPager mViewPager;
 
-    /**
-     * The {@link android.support.v4.view.PagerAdapter} that will provide
-     * fragments for each of the sections. We use a
-     * {@link FragmentPagerAdapter} derivative, which will keep every
-     * loaded fragment in memory. If this becomes too memory intensive, it
-     * may be best to switch to a
-     * {@link android.support.v13.app.FragmentStatePagerAdapter}.
-     */
-    DisplayInformationPagerAdapter mSectionsPagerAdapter;
+    private DisplayInformationPagerAdapter mSectionsPagerAdapter;
+    private boolean serviceConnected;
+    private ObdCommandService service;
+    private final ServiceConnection connection = new ServiceConnection()
+    {
+        @Override
+        public void onServiceConnected(ComponentName componentName, IBinder iBinder)
+        {
+            ObdCommandService.ObdCommandBinder binder = (ObdCommandService.ObdCommandBinder) iBinder;
+            DisplayInformationActivity.this.service = binder.getService();
+            serviceConnected = true;
+        }
 
-    /**
-     * The {@link ViewPager} that will host the section contents.
-     */
-    @InjectView(R.id.pager) ViewPager mViewPager;
+        @Override
+        public void onServiceDisconnected(ComponentName componentName)
+        {
+            serviceConnected = false;
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -86,6 +99,13 @@ public class DisplayInformationActivity extends Activity implements ActionBar.Ta
 
         mViewPager.setCurrentItem(InformationType.ADAPTER.getValue());
         connectBluetooth();
+    }
+
+    @Override
+    protected void onDestroy()
+    {
+        unbindService(connection);
+        super.onDestroy();
     }
 
     private void connectBluetooth()
@@ -140,5 +160,13 @@ public class DisplayInformationActivity extends Activity implements ActionBar.Ta
     public void onAdapterFragmentInteraction(Uri uri)
     {
 
+    }
+
+    @Override
+    public void onBluetoothDeviceSelected(BluetoothDevice device)
+    {
+        Intent intent = new Intent(this, ObdCommandService.class);
+        intent.putExtra(getString(R.string.intent_bluetooth_device), device);
+        bindService(intent, connection, BIND_AUTO_CREATE);
     }
 }
