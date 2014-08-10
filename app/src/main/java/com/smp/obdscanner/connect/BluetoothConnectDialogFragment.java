@@ -6,14 +6,19 @@ import android.app.Dialog;
 import android.app.DialogFragment;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ListView;
 import android.widget.Toast;
+import android.widget.ViewFlipper;
 
 import com.smp.obdscanner.R;
 
@@ -25,11 +30,47 @@ import java.util.Set;
  */
 public class BluetoothConnectDialogFragment extends DialogFragment
 {
+    public enum FoundFlipperState
+    {
+        BUTTON(0), PROGRESS(1), LIST(2), NOT_FOUND(3);
+
+        private int value;
+
+        private FoundFlipperState(int value)
+        {
+            this.value = value;
+        }
+
+        public int getValue()
+        {
+            return value;
+        }
+    }
     public static final int REQUEST_ENABLE_BT = 4343;
+    private final BroadcastReceiver mFoundReceiver = new BroadcastReceiver()
+    {
+        public void onReceive(Context context, Intent intent)
+        {
+            String action = intent.getAction();
+            // When discovery finds a device
+            if (BluetoothDevice.ACTION_FOUND.equals(action))
+            {
+                mScanFlipper.setDisplayedChild(FoundFlipperState.LIST.getValue());
+                // Get the BluetoothDevice object from the Intent
+                BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+                // Add the name and address to an array adapter to show in a ListView
+                mFoundArrayAdapter.add(device.getName() + "\n" + device.getAddress());
+            }
+        }
+    };
     private BluetoothAdapter mBluetoothAdapter;
-    private ArrayAdapter<String> mArrayAdapter;
+    private ArrayAdapter<String> mPairedArrayAdapter;
+    private ArrayAdapter<String> mFoundArrayAdapter;
     private ListView mPairedDeviceListView;
+    private ListView mFoundDeviceListView;
     private View rootView;
+    private Button mScanButton;
+    private ViewFlipper mScanFlipper;
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data)
@@ -38,6 +79,9 @@ public class BluetoothConnectDialogFragment extends DialogFragment
         if (requestCode == REQUEST_ENABLE_BT && resultCode == Activity.RESULT_OK)
         {
             showPairedDevices();
+        } else
+        {
+            Toast.makeText(getActivity(), getActivity().getString(R.string.toast_enable_bluetooth), Toast.LENGTH_LONG).show();
         }
     }
 
@@ -48,7 +92,7 @@ public class BluetoothConnectDialogFragment extends DialogFragment
         {
             for (BluetoothDevice device : pairedDevices)
             {
-                mArrayAdapter.add(device.getName() + "\n" + device.getAddress());
+                mPairedArrayAdapter.add(device.getName() + "\n" + device.getAddress());
             }
         }
     }
@@ -63,9 +107,6 @@ public class BluetoothConnectDialogFragment extends DialogFragment
     public void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
-        //List<String> list = new ArrayList<String>();
-        mArrayAdapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_list_item_1, new ArrayList<String>());
-
     }
     /*
     @Override
@@ -96,7 +137,6 @@ public class BluetoothConnectDialogFragment extends DialogFragment
                 });
         rootView = inflater.inflate(R.layout.dialog_connect, null);
         builder.setView(rootView);
-        // Create the AlertDialog object and return it
         return builder.create();
     }
 
@@ -105,9 +145,41 @@ public class BluetoothConnectDialogFragment extends DialogFragment
     {
         super.onActivityCreated(savedInstanceState);
 
-        mPairedDeviceListView = (ListView) (rootView.findViewById(R.id.listview_paired_device));
-        mPairedDeviceListView.setAdapter(mArrayAdapter);
+        mPairedArrayAdapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_list_item_1, new ArrayList<String>());
+        mFoundArrayAdapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_list_item_1, new ArrayList<String>());
 
+        mScanFlipper = (ViewFlipper) rootView.findViewById(R.id.flipper_found_device);
+        mScanButton = (Button) rootView.findViewById(R.id.button_bluetooth_scan);
+        mPairedDeviceListView = (ListView) (rootView.findViewById(R.id.listview_paired_device));
+        mFoundDeviceListView = (ListView) (rootView.findViewById(R.id.listview_found_device));
+
+        mPairedDeviceListView.setAdapter(mPairedArrayAdapter);
+        mFoundDeviceListView.setAdapter(mFoundArrayAdapter);
+
+        mScanButton.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View view)
+            {
+                startBluetoothScan();
+            }
+        });
+
+        initBluetooth();
+
+    }
+
+    private void startBluetoothScan()
+    {
+        IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
+        getActivity().registerReceiver(mFoundReceiver, filter);
+        mScanFlipper.setDisplayedChild(FoundFlipperState.PROGRESS.getValue());
+        mBluetoothAdapter.startDiscovery();
+    }
+
+
+    private void initBluetooth()
+    {
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         if (mBluetoothAdapter == null)
         {
@@ -142,5 +214,13 @@ public class BluetoothConnectDialogFragment extends DialogFragment
     public void onStop()
     {
         super.onStop();
+    }
+
+    @Override
+    public void onDestroy()
+    {
+        if (mBluetoothAdapter != null) mBluetoothAdapter.cancelDiscovery();
+        getActivity().unregisterReceiver(mFoundReceiver);
+        super.onDestroy();
     }
 }
