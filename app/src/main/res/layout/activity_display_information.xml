@@ -14,7 +14,7 @@
         android:layout_width="match_parent"
         android:layout_height="0px"
         android:layout_weight="1"
-        tools:context="com.smp.obdscanner.information.DisplayInformationActivity" />
+        tools:context="com.smp.obdscanner.displayinformation.DisplayInformationActivity" />
 
 
 </LinearLayout>

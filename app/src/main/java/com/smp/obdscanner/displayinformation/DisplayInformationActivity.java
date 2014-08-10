@@ -1,4 +1,4 @@
-package com.smp.obdscanner.information;
+package com.smp.obdscanner.displayinformation;
 
 import android.app.ActionBar;
 import android.app.Activity;
@@ -13,7 +13,6 @@ import android.view.MenuItem;
 
 import com.smp.obdscanner.R;
 import com.smp.obdscanner.connect.BluetoothConnectDialogFragment;
-import com.smp.obdscanner.view.SlidingTabLayout;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;

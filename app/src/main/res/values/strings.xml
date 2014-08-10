@@ -15,5 +15,7 @@
     <string name="button_negative">Cancel</string>
     <string name="message_bluetooth_connect">Connect to your Device...</string>
     <string name="tag_bluetooth_connect">bluetooth connect</string>
+    <string name="toast_no_bluetooth">Your device does not support bluetooth, exiting...</string>
+    <string name="label_paired_devices">Paired Devices:</string>
 
 </resources>
