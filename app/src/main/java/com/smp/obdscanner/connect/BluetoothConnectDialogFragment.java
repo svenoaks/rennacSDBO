@@ -15,6 +15,7 @@ import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
@@ -26,6 +27,7 @@ import com.smp.obdscanner.R;
 import com.smp.obdscanner.displaydata.DisplayInformationActivity;
 import com.smp.obdscanner.servicedata.ObdCommandService;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Set;
 
@@ -43,11 +45,13 @@ public class BluetoothConnectDialogFragment extends DialogFragment implements On
             // When discovery finds a device
             if (BluetoothDevice.ACTION_FOUND.equals(action))
             {
-                mScanFlipper.setDisplayedChild(FoundFlipperState.LIST.getValue());
-                // Get the BluetoothDevice object from the Intent
                 BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-                // Add the name and address to an array adapter to show in a ListView
-                mFoundArrayAdapter.add(device);
+
+                if (!isAlreadyPaired(device))
+                {
+                    mScanFlipper.setDisplayedChild(FoundFlipperState.LIST.getValue());
+                    mFoundArrayAdapter.add(device);
+                }
             }
         }
     };
@@ -225,13 +229,47 @@ public class BluetoothConnectDialogFragment extends DialogFragment implements On
         super.onDestroy();
     }
 
+    private boolean isAlreadyPaired(BluetoothDevice device)
+    {
+        boolean alreadyPaired = false;
+        for (int i = 0; i < mPairedArrayAdapter.getCount(); ++i)
+        {
+            BluetoothDevice otherDevice = mPairedArrayAdapter.getItem(i);
+            if (device.getAddress().equals(otherDevice.getAddress()) &&
+                    device.getName().equals(otherDevice.getName()))
+            {
+                alreadyPaired = true;
+                break;
+            }
+        }
+        return alreadyPaired;
+    }
+
     @Override
     public void onBluetoothDeviceSelected(BluetoothDevice device)
     {
+        if (!isAlreadyPaired(device))
+        {
+            pairDevice(device);
+        }
+
         listener.onBluetoothDeviceSelected(device);
         dismiss();
     }
 
+    private void pairDevice(BluetoothDevice device)
+    {
+        try
+        {
+            Log.d("pairDevice()", "Start Pairing...");
+            Method m = device.getClass().getMethod("createBond", (Class[]) null);
+            m.invoke(device, (Object[]) null);
+            Log.d("pairDevice()", "Pairing finished.");
+        } catch (Exception e)
+        {
+            Log.e("pairDevice()", e.getMessage());
+        }
+    }
     public enum FoundFlipperState
     {
         BUTTON(0), PROGRESS(1), LIST(2), NOT_FOUND(3);

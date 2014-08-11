@@ -12,6 +12,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v4.view.ViewPager;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
@@ -20,7 +21,7 @@ import com.smp.obdscanner.connect.BluetoothConnectDialogFragment;
 import com.smp.obdscanner.connect.OnBluetoothDeviceSelectedListener;
 import com.smp.obdscanner.servicedata.ObdCommandService;
 
-import java.io.IOException;
+import java.lang.reflect.Method;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
@@ -51,6 +52,7 @@ public class DisplayInformationActivity extends Activity implements ActionBar.Ta
             serviceConnected = false;
         }
     };
+
     /*
     private void beginBluetoothConnection()
     {
@@ -184,4 +186,6 @@ public class DisplayInformationActivity extends Activity implements ActionBar.Ta
         startService(intent);
         bindService(intent, connection, BIND_AUTO_CREATE);
     }
+
+
 }
