@@ -3,12 +3,10 @@ package com.smp.obdscanner.servicedata;
 import android.app.Service;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
-import android.content.Context;
 import android.content.Intent;
 import android.os.Binder;
 import android.os.IBinder;
 import android.provider.Settings;
-import android.telephony.TelephonyManager;
 import android.util.Log;
 
 import com.smp.obdscanner.R;
@@ -21,12 +19,12 @@ import java.util.UUID;
 public class ObdCommandService extends Service
 {
     private static final String TAG = "OBD_SERVICE";
+
     private UUID MY_UUID;
-
-
     private BluetoothDevice device;
     private BluetoothSocket socket;
     private BluetoothSocket socketFallback;
+    private boolean running;
 
     @Override
     public void onCreate()
@@ -64,6 +62,7 @@ public class ObdCommandService extends Service
 
     public void stopService()
     {
+        running = false;
         Log.d(TAG, "Stopping service..");
 
         if (socket != null)
@@ -80,7 +79,8 @@ public class ObdCommandService extends Service
     }
 
     //TODO figure out what the hell it's doing.
-    private void startObdConnection() throws IOException
+    //TODO Definetly can't be on main thread.
+    public void startObdConnection() throws IOException
     {
         Log.d(TAG, "Starting OBD connection..");
 
@@ -108,8 +108,12 @@ public class ObdCommandService extends Service
                 return;
             }
         }
+        running = true;
     }
-
+    public boolean isRunning()
+    {
+        return isRunning();
+    }
     public class ObdCommandBinder extends Binder
     {
         public ObdCommandService getService()

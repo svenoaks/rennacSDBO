@@ -20,6 +20,8 @@ import com.smp.obdscanner.connect.BluetoothConnectDialogFragment;
 import com.smp.obdscanner.connect.OnBluetoothDeviceSelectedListener;
 import com.smp.obdscanner.servicedata.ObdCommandService;
 
+import java.io.IOException;
+
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 
@@ -40,6 +42,7 @@ public class DisplayInformationActivity extends Activity implements ActionBar.Ta
             ObdCommandService.ObdCommandBinder binder = (ObdCommandService.ObdCommandBinder) iBinder;
             DisplayInformationActivity.this.service = binder.getService();
             serviceConnected = true;
+            //DisplayInformationActivity.this.beginBluetoothConnection();
         }
 
         @Override
@@ -48,7 +51,18 @@ public class DisplayInformationActivity extends Activity implements ActionBar.Ta
             serviceConnected = false;
         }
     };
-
+    /*
+    private void beginBluetoothConnection()
+    {
+        try
+        {
+            service.startObdConnection();
+        } catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+    }
+    */
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
@@ -167,6 +181,7 @@ public class DisplayInformationActivity extends Activity implements ActionBar.Ta
     {
         Intent intent = new Intent(this, ObdCommandService.class);
         intent.putExtra(getString(R.string.intent_bluetooth_device), device);
+        startService(intent);
         bindService(intent, connection, BIND_AUTO_CREATE);
     }
 }
