@@ -231,6 +231,7 @@ public class BluetoothConnectDialogFragment extends DialogFragment implements On
 
     private boolean isAlreadyPaired(BluetoothDevice device)
     {
+        //TODO stupid, use device constants...
         boolean alreadyPaired = false;
         for (int i = 0; i < mPairedArrayAdapter.getCount(); ++i)
         {

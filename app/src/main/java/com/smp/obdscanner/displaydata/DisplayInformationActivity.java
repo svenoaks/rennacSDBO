@@ -15,11 +15,13 @@ import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import com.smp.obdscanner.R;
 import com.smp.obdscanner.connect.BluetoothConnectDialogFragment;
 import com.smp.obdscanner.connect.OnBluetoothDeviceSelectedListener;
 import com.smp.obdscanner.servicedata.ObdCommandService;
+import com.smp.obdscanner.servicedata.ObdCommandServiceListener;
 
 import java.lang.reflect.Method;
 
@@ -41,6 +43,14 @@ public class DisplayInformationActivity extends Activity implements ActionBar.Ta
         public void onServiceConnected(ComponentName componentName, IBinder iBinder)
         {
             ObdCommandService.ObdCommandBinder binder = (ObdCommandService.ObdCommandBinder) iBinder;
+            binder.setListener(new ObdCommandServiceListener()
+            {
+                @Override
+                public void onDeviceConnected()
+                {
+                    Toast.makeText(DisplayInformationActivity.this, "IZZZZ CONNECTED", Toast.LENGTH_LONG).show();
+                }
+            });
             DisplayInformationActivity.this.service = binder.getService();
             serviceConnected = true;
             //DisplayInformationActivity.this.beginBluetoothConnection();
